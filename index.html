@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Doctor - Health Monitoring</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #c8e8f4, #f6d365);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      margin: 0;
+      flex-direction: column;
+      padding-bottom: 60px;
+      overflow: auto;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      text-align: center;
+    }
+    footer {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 30px;
+      color: #555;
+      background-color: #f1f1f1;
+      padding: 10px 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 AI Doctor</h1>
+    <h2>Health Monitoring System</h2>
+
+    <label for="name">👤 Name</label>
+    <input type="text" id="name" placeholder="Enter your name" />
+
+    <label for="age">🎂 Age</label>
+    <input type="number" id="age" placeholder="Enter your age" />
+
+    <label for="weight">⚖️ Weight (kg)</label>
+    <input type="number" id="weight" placeholder="Enter your weight" />
+
+    <button onclick="submitBasicInfo()">✅ Submit Basic Info</button>
+
+    <div class="result" id="status"></div>
+
+    <div id="vital-signs" style="display: none;">
+      <label for="hr">💓 Heart Rate (bpm)</label>
+      <input type="number" id="hr" placeholder="Enter your heart rate" />
+
+      <label for="bpSystolic">🩸 BP Systolic (mmHg)</label>
+      <input type="number" id="bpSystolic" placeholder="Systolic" />
+
+      <label for="bpDiastolic">🩸 BP Diastolic (mmHg)</label>
+      <input type="number" id="bpDiastolic" placeholder="Diastolic" />
+
+      <label for="temp">🌡️ Temperature (°C)</label>
+      <input type="number" id="temp" placeholder="Body Temp" />
+
+      <label for="problem">💬 Health Problem</label>
+      <input type="text" id="problem" placeholder="Fever, Cough, etc." />
+
+      <button onclick="checkVitalSigns()">✅ Check Status</button>
+    </div>
+
+    <button onclick="downloadPDF()">⬇️ Download PDF Report</button>
+  </div>
+
+  <footer>
+    <p>Created by Prasanth - All Rights Reserved</p>
+    <p>📧 Contact: <a href="mailto:prasanth@example.com">prasanth@example.com</a></p>
+  </footer>
+
+  <script>
+    let currentStatus = "", currentAdvice = "", currentMeds = "", currentPrecautions = "";
+
+    function submitBasicInfo() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const weight = document.getElementById("weight").value;
+
+      if (!name || !age || !weight) {
+        alert("Please fill in all basic info.");
+        return;
+      }
+
+      document.getElementById("vital-signs").style.display = "block";
+      document.getElementById("status").innerHTML = "Now enter your vitals and health issue.";
+    }
+
+    function checkVitalSigns() {
+      const hr = document.getElementById("hr").value;
+      const bpSystolic = document.getElementById("bpSystolic").value;
+      const bpDiastolic = document.getElementById("bpDiastolic").value;
+      const temp = document.getElementById("temp").value;
+      const problem = document.getElementById("problem").value.toLowerCase();
+
+      if (!hr || !bpSystolic || !bpDiastolic || !temp || !problem) {
+        alert("Please complete all vital sign inputs.");
+        return;
+      }
+
+      let vitalsStatus = "";
+      if (hr < 60) vitalsStatus += "Low HR. ";
+      if (hr > 100) vitalsStatus += "High HR. ";
+      if (bpSystolic < 90 || bpDiastolic < 60) vitalsStatus += "Low BP. ";
+      if (bpSystolic > 140 || bpDiastolic > 90) vitalsStatus += "High BP. ";
+      if (temp > 38) vitalsStatus += "High Temp. ";
+
+      currentStatus = "Vitals Checked";
+      currentAdvice = vitalsStatus ? vitalsStatus : "All vitals are normal.";
+      currentMeds = (problem.includes("fever")) ? "Paracetamol 500mg" :
+                    (problem.includes("cough")) ? "Cough Syrup" :
+                    "Consult nearby doctor";
+      currentPrecautions = "Rest well, Drink fluids, Avoid stress";
+
+      document.getElementById("status").innerHTML = `
+        <strong>Status:</strong> ${currentStatus}<br>
+        <strong>Advice:</strong> ${currentAdvice}<br>
+        <strong>Medications:</strong> ${currentMeds}<br>
+        <strong>Precautions:</strong> ${currentPrecautions}
+      `;
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const weight = document.getElementById("weight").value;
+      const hr = document.getElementById("hr").value;
+      const bpSystolic = document.getElementById("bpSystolic").value;
+      const bpDiastolic = document.getElementById("bpDiastolic").value;
+      const temp = document.getElementById("temp").value;
+      const problem = document.getElementById("problem").value;
+
+      doc.setFontSize(18);
+      doc.text("AI Doctor - Medical Report", 60, 15);
+      doc.setFontSize(12);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
+
+      doc.autoTable({
+        startY: 30,
+        head: [['Field', 'Value']],
+        body: [
+          ['Patient Name', name],
+          ['Age', age],
+          ['Weight (kg)', weight],
+          ['Heart Rate (bpm)', hr],
+          ['Blood Pressure (mmHg)', `${bpSystolic}/${bpDiastolic}`],
+          ['Temperature (°C)', temp],
+          ['Problem', problem],
+          ['Status', currentStatus],
+          ['Advice', currentAdvice],
+          ['Medications', currentMeds],
+          ['Precautions', currentPrecautions],
+        ],
+        styles: {
+          fontSize: 11,
+          cellPadding: 3,
+        }
+      });
+
+      doc.save("AI_Doctor_Report.pdf");
+    }
+  </script>
+</body>
+</html>
